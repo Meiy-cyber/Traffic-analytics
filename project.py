@@ -12,29 +12,36 @@ engine = create_engine(connection_string)
 
 st.header("Traffic_crash_data")
 
-df = pd.read_sql("""
+query ="""
     SELECT *
     FROM traffic_crash_data
-""", engine)
+"""
+
+st.code(query, language="sql")
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
 st.subheader("""Find the top 5 most dangerous combinations of weather and
 crash type based on total crashes""")
 
-df = pd.read_sql("""
-    SELECT
-        weather_condition,
-        crash_type,
-        COUNT(*) AS total_crashes
-    FROM traffic_crash_data
-    GROUP BY
-        weather_condition,
-        crash_type
-    ORDER BY
-        total_crashes DESC
-    LIMIT 5;
-""", engine)
+query = """
+SELECT
+    weather_condition,
+    crash_type,
+    COUNT(*) AS total_crashes
+FROM traffic_crash_data
+GROUP BY
+    weather_condition,
+    crash_type
+ORDER BY
+    total_crashes DESC
+LIMIT 5;
+"""
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
+
 
 st.write(df)
 
@@ -48,7 +55,7 @@ st.bar_chart(
 st.subheader("""Identify the top 10 streets with the highest number of injury
 crashes""")
 
-df = pd.read_sql("""
+query ="""
     SELECT 
         street_name,
         COUNT(*) AS total_injury_crashes
@@ -61,7 +68,11 @@ df = pd.read_sql("""
     ORDER BY 
         total_injury_crashes DESC
     LIMIT 10;
-""", engine)
+"""
+
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -74,7 +85,7 @@ st.bar_chart(
 st.subheader("""Find the percentage of crashes that resulted in injuries for each
 crash type""")
 
-df = pd.read_sql("""
+query ="""
     SELECT 
     crash_type,
     AVG(injuries_total > 0) * 100 AS injury_percentage
@@ -82,7 +93,11 @@ FROM
     traffic_crash_data
 GROUP BY 
     crash_type;
-    """, engine)
+    """
+
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -94,7 +109,7 @@ st.line_chart(
 
 st.subheader("""Determine the peak crash hour for each month""")
 
-df = pd.read_sql("""
+query = """
 SELECT
     DATE_FORMAT(crash_date, '%%m') AS crash_month,
     DATE_FORMAT(crash_date, '%%H') AS peak_hour,
@@ -106,7 +121,11 @@ GROUP BY
     DATE_FORMAT(crash_date, '%%H')
 ORDER BY
     total_crashes DESC;
-""", engine)
+"""
+
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -114,7 +133,7 @@ st.write(df)
 
 st.subheader(""" Find the top 5 primary causes of crashes during night time (CRASH_HOUR ≥ 18)""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     FIRST_CRASH_TYPE,
     COUNT(*) AS total_crashes
@@ -127,7 +146,10 @@ GROUP BY
 ORDER BY 
     total_crashes DESC
 LIMIT 5;
-""", engine)
+"""
+
+st.code(query, language="sql")
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -139,7 +161,8 @@ st.bar_chart(
 
 st.subheader("""Compare average number of injuries in daylight vs darkness conditions""")
 
-df = pd.read_sql("""SELECT 
+query = """
+SELECT 
     LIGHTING_CONDITION,
     AVG(INJURIES_TOTAL) AS avg_injuries
 FROM 
@@ -149,7 +172,10 @@ WHERE
     OR LIGHTING_CONDITION LIKE '%%DARK%%'
 GROUP BY 
     LIGHTING_CONDITION;
-    """, engine)
+"""
+
+st.code(query, language="sql")
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -162,7 +188,7 @@ st.line_chart(
 
 st.subheader("""Find which traffic control device type has the highest average injuries per crash""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     TRAFFIC_CONTROL_DEVICE,
     AVG(INJURIES_TOTAL) AS avg_injuries
@@ -173,13 +199,16 @@ GROUP BY
 ORDER BY 
     avg_injuries DESC
 LIMIT 1;
-""", engine)
+"""
+st.code(query, language="sql")
+df = pd.read_sql(query, engine)
+    
 
 st.write(df)
 
 st.subheader("""Identify the top 5 locations (latitude/longitude) with the highest crash frequency""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     LATITUDE,
     LONGITUDE,
@@ -195,13 +224,16 @@ GROUP BY
 ORDER BY 
     total_crashes DESC
 LIMIT 5;
-""", engine)
+"""
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
 st.subheader("""Find the top 5 streets with the highest injury rate, considering only streets with more than 100 crashes""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     STREET_NAME,
     COUNT(*) AS total_crashes,
@@ -217,7 +249,12 @@ HAVING
 ORDER BY 
     injury_rate DESC
 LIMIT 5;
-""", engine)
+"""
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
+
+
 
 st.write(df)
 
@@ -229,7 +266,7 @@ st.bar_chart(
 
 st.subheader("""For each year, identify the most common crash type""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     year AS CRASH_YEAR,
     FIRST_CRASH_TYPE AS most_common_crash_type,
@@ -242,8 +279,11 @@ GROUP BY
 ORDER BY 
     CRASH_YEAR ASC, 
     total_crashes DESC
-""",engine)
+"""
 
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 st.write(df)
 
 st.bar_chart(
@@ -256,7 +296,7 @@ st.bar_chart(
 
 st.subheader("""Find the day of the week with the highest average crashes per hour""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     CRASH_DAY_OF_WEEK,
     ROUND(COUNT(*) / 24.0, 2) AS avg_crashes_per_hour
@@ -267,7 +307,11 @@ GROUP BY
 ORDER BY 
     avg_crashes_per_hour DESC
 LIMIT 1;
-""", engine)
+"""
+
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -276,7 +320,7 @@ st.subheader("""Identify high-risk time slots:
 ● Find which bucket has the highest injury crashes
 """)
 
-df = pd.read_sql("""
+query = """
 SELECT 
     CASE 
         WHEN CRASH_HOUR BETWEEN 6 AND 11 THEN 'Morning'
@@ -291,7 +335,11 @@ GROUP BY
     time_bucket
 ORDER BY 
     total_injuries DESC;
-    """, engine)
+    """
+
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -303,7 +351,7 @@ st.bar_chart(
 
 st.subheader(""" Find the top 3 contributing causes for each crash type""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     FIRST_CRASH_TYPE,
     PRIM_CONTRIBUTORY_CAUSE,
@@ -325,7 +373,11 @@ FROM (
 ) AS ranked_crashes
 WHERE 
     rnk <= 3;
-""", engine)
+"""
+
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -338,7 +390,7 @@ st.bar_chart(
 
 st.subheader("""Calculate the year-over-year growth rate of crashes""")
 
-df = pd.read_sql("""
+query = """
     SELECT 
     year AS CRASH_YEAR,
     COUNT(*) AS total_crashes,
@@ -354,7 +406,11 @@ GROUP BY
     year
 ORDER BY 
     year;
-""", engine)
+"""
+
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
@@ -369,7 +425,7 @@ st.subheader("""Identify hotspot zones:
 places)
 ● Find top 10 zones with highest crashes""")
 
-df = pd.read_sql("""
+query = """
 SELECT 
     ROUND(LATITUDE, 2) AS lat_zone,
     ROUND(LONGITUDE, 2) AS long_zone,
@@ -385,7 +441,10 @@ GROUP BY
 ORDER BY 
     total_crashes DESC
 LIMIT 10;
-""", engine)
+"""
+st.code(query, language="sql")
+
+df = pd.read_sql(query, engine)
 
 st.write(df)
 
